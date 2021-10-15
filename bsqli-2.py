@@ -84,7 +84,7 @@ def main(argv):
   try:
     opts, args = getopt.getopt(argv, "hu:")
   except getopt.GetoptError:
-    print("This is the script for:\n'Blind SQL injection with conditional errors'\n\nUsage: bsqli-2.py -u <url>")
+    print("This is the script for:\n'Blind SQL injection with conditional errors'\n\nUsage: python3 bsqli-2.py -u <url>")
     print("\x1b[?25h")
     sys.exit(2)
 
@@ -93,7 +93,7 @@ def main(argv):
       url = arg
       trackingId, session = get_cookie(url)
     elif opt == "-h":
-      print("This is the script for:\n'Blind SQL injection with conditional errors'\n\nUsage: bsqli-2.py -u <url>")
+      print("This is the script for:\n'Blind SQL injection with conditional errors'\n\nUsage: python3 bsqli-2.py -u <url>")
       print("\x1b[?25h")
       sys.exit()
   password_length = get_password_length(url, trackingId, session)

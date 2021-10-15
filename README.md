@@ -20,7 +20,7 @@ $ python3 bsqli-1.py -h
 This is the script for:
 'Blind SQL injection with conditional responses'
 
-Usage: bsqli-1.py -u <url>
+Usage: python3 bsqli-1.py -u <url>
 ```
 
 Enjoy and have fun learning :)
