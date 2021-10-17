@@ -13,6 +13,8 @@ Scripts to automate attacks on PortSwigger Labs.\
 
 **bsqli-4.py** is for the lab **Blind SQL injection with time delays and information retrieval**
 
+**auth-1.py** is for the lab **Username enumeration via different responses**
+
 # usage
 
 ```console
