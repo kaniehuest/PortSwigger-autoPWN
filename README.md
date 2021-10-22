@@ -3,6 +3,16 @@
 Scripts to automate attacks on PortSwigger Labs.\
 **You don't need Burpsuite Professional.**
 
+# usage
+
+```console
+$ python3 bsqli-1.py -h
+This is the script for:
+'Blind SQL injection with conditional responses'
+
+Usage: python3 bsqli-1.py -u <url>
+```
+
 # List of Labs
 
 **bsqli-1.py** is for the lab **Blind SQL injection with conditional responses**
@@ -15,14 +25,6 @@ Scripts to automate attacks on PortSwigger Labs.\
 
 **auth-1.py** is for the lab **Username enumeration via different responses**
 
-# usage
-
-```console
-$ python3 bsqli-1.py -h
-This is the script for:
-'Blind SQL injection with conditional responses'
-
-Usage: python3 bsqli-1.py -u <url>
-```
+**auth-2.py** is for the lab **Username enumeration via subtly different responses**
 
 Enjoy and have fun learning :)
