@@ -29,4 +29,8 @@ Usage: python3 bsqli-1.py -u <url>
 
 **auth-3.py** is for the lab **Username enumeration via response timing**
 
+**auth-4.py** is for the lab **Broken brute-force protection, IP block**
+
+**auth-5.py** is for the lab **Username enumeration via account lock**
+
 Enjoy and have fun learning :)

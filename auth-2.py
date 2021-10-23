@@ -19,7 +19,7 @@ def get_username(url, session):
   for username in usernames:
     username = username.strip()
     data = {'username' : username, 'password' : 'a'}
-    post_request = session.post(url, data = data)
+    post_request = session.post(url, data=data)
     text = post_request.text
     login_message = re.search(regex, text).group(1)    
     clear_screen()
