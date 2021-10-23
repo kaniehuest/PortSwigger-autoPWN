@@ -27,4 +27,6 @@ Usage: python3 bsqli-1.py -u <url>
 
 **auth-2.py** is for the lab **Username enumeration via subtly different responses**
 
+**auth-3.py** is for the lab **Username enumeration via response timing**
+
 Enjoy and have fun learning :)
