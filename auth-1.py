@@ -86,24 +86,20 @@ def main(argv):
 
   session = requests.Session()
 
-  # Create spinner animation
-  spinner = Halo(text='Testing usernames...', 
-                 spinner='bouncingBar')
-  # Start spinner
+  # Create and start spinner animation
+  spinner = Halo(text='Testing usernames...', spinner='bouncingBar')
   spinner.start()
-  # Test usernames
+  # Get valid username
   username = get_username(url, session)
-  # Get valid username and finish spinner
+  # Finish spinner
   spinner.succeed(f"The username is: \"{username}\"")
 
-  # Create spinner animation
-  spinner = Halo(text='Testing passwords...', 
-                 spinner='bouncingBar')
-  # Start spinner
+  # Create and start spinner animation
+  spinner = Halo(text='Testing passwords...', spinner='bouncingBar')
   spinner.start()
-  # Test passwords with valid username
+  # Get valid password
   password = get_password(url, session, username)
-  # Get valid password and finish spinner
+  # Finish spinner
   spinner.succeed(f"The password is: \"{password}\"")
 
 
