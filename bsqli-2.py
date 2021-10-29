@@ -87,7 +87,7 @@ def main(argv):
   # Create and start spinner animation
   spinner = Halo(text="Getting password length...", spinner="bouncingBar")
   spinner.start()
-  # Get valid username
+  # Get password length
   password_length = get_password_length(url, trackingId, session)
   # Finish spinner
   spinner.succeed(f"The password length is: \"{password_length}\"")
