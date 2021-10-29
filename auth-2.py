@@ -24,8 +24,7 @@ def get_username(url, session):
 
   def test_usernames(username):
     username = username.strip()
-    data = {'username': username, 
-            'password': 'a'}
+    data = {'username': username, 'password': 'a'}
     response = session.post(url, data=data)
     response_text = response.text
     error_message = re.search(regex, response_text).group(1)    
@@ -51,8 +50,7 @@ def get_password(url, session, valid_username):
 
   def test_passwords(password):
     password = password.strip()
-    data = {'username': valid_username,
-            'password': password}
+    data = {'username': valid_username, 'password': password}
     response = session.post(url, data=data)
     response_text = response.text
 
@@ -111,8 +109,6 @@ def main(argv):
 
 if __name__ == "__main__":
   print("\x1b[?25l", end="") # Hide cursor
-
   main(sys.argv[1:])
-
   print("\x1b[?25h", end="") # Make cursor visible
   sys.exit()
