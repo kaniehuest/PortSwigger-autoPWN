@@ -9,6 +9,7 @@ from halo import Halo
 
 # Handle Ctrl+c
 def signal_handler(signum, frame):
+  print("\nExiting...")
   print("\x1b[?25h", end="") # Make cursor visible
   sys.exit(0)
 
