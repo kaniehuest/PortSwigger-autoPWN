@@ -3,7 +3,6 @@ import requests
 import sys
 import getopt
 from halo import Halo
-import signal
 
 
 def get_username(url, session):

