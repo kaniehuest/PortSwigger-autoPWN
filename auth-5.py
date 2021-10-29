@@ -31,7 +31,9 @@ def get_username(url, session):
   for x in threads:
     x.join()
   
+  usernames.close()
   return valid_username[0]
+
 
 def get_password(url, session, valid_username):
   passwords = open("./passwords.txt", "r")
@@ -57,6 +59,7 @@ def get_password(url, session, valid_username):
   for x in threads:
     x.join()
 
+  passwords.close()
   return valid_password[0]
 
 def main(argv):

@@ -63,7 +63,8 @@ def get_password(url, session, valid_username):
 
   for x in threads:
     x.join()
-  
+
+  passwords.close() 
   return valid_password[0]
 
 
