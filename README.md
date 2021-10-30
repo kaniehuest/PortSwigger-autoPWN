@@ -26,5 +26,6 @@ Usage: python3 bsqli-1.py -u <url>
 | auth-3.py  | Username enumeration via response timing                       |
 | auth-4.py  | Broken brute-force protection, IP block                        |
 | auth-5.py  | Username enumeration via account lock                          |
+| auth-6.py  | 2FA broken logic                                               |
 
 Enjoy and have fun learning :)
