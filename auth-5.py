@@ -69,7 +69,7 @@ def main(argv):
     opts, args = getopt.getopt(argv, "hu:")
   except getopt.GetoptError:
     print(help_message)
-    print("\x1b[?25h") # Make cursor visible
+    print("\x1b[?25h", end="") # Make cursor visible
     sys.exit(2)
 
   for opt, arg in opts:
@@ -77,7 +77,7 @@ def main(argv):
       url = arg
     elif opt == "-h":
       print(help_message)
-      print("\x1b[?25h") # Make cursor visible
+      print("\x1b[?25h", end="") # Make cursor visible
       sys.exit()
 
   session = requests.Session()
